@@ -29,8 +29,7 @@ await destroyCanvas()
 <template>
   
 
-    <div class="flex justify-center">
-
+    <div class="flex justify-center border rounded-sm  shadow-sm hover:shadow-xl hover:translate-y-1 bg-white">
       <canvas  class="box" ref="canvasId"></canvas>
     </div>
   
@@ -38,8 +37,5 @@ await destroyCanvas()
 </template>
 
 <style>
-.box{
-    border: 2px solid black;
-   
-}
+
 </style>

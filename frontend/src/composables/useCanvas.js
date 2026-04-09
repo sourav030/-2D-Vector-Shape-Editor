@@ -17,13 +17,14 @@ export const useFabric = () => {
     const notify = () => {
         toast("Save Succesfull !", {
             autoClose: 1000,
-        }); // ToastOptions
+        }); 
     }
     const syncToVue = (obj) => {
         if (!obj) return
         selectedObject.value = obj
         positionX.value = Math.round(obj.left)
         positionY.value = Math.round(obj.top)
+        
     }
 
     const initCanvas = (canvasEl) => {
@@ -31,7 +32,7 @@ export const useFabric = () => {
 
         canvas.value = new Canvas(canvasEl.value, {
             width: 700,
-            height: 600,
+            height: 500,
             backgroundColor: 'white',
             preserveObjectStacking: true
         })
@@ -45,6 +46,10 @@ export const useFabric = () => {
             selectedObject.value = null
         })
 
+        
+        canvas.value.freeDrawingBrush = new PencilBrush(canvas.value)
+        canvas.value.freeDrawingBrush.color = 'blue'
+        canvas.value.freeDrawingBrush.width = 5
 
         canvas.value.on('object:moving', (e) => syncToVue(e.target))
         canvas.value.on('object:modified', (e) => syncToVue(e.target))
@@ -72,7 +77,7 @@ export const useFabric = () => {
         const rect = new Rect({
             width: 100,
             height: 100,
-            fill: 'red',
+            fill: 'white',
             left: 50,
             top: 50,
             stroke: 'black',
@@ -87,7 +92,7 @@ export const useFabric = () => {
             width: 100,
             height: 100,
             radius: 40,
-            fill: 'red',
+            fill: 'white',
             left: 50,
             top: 50,
             stroke: 'black',
@@ -100,7 +105,7 @@ export const useFabric = () => {
         const triangle = new Triangle({
             width: 100,
             height: 100,
-            fill: 'red',
+            fill: 'white',
             left: 50,
             top: 50,
             stroke: "black",
@@ -111,10 +116,11 @@ export const useFabric = () => {
 
     const enableDrawingMode = () => {
         if (!canvas.value) return
-        canvas.value.freeDrawingBrush = new PencilBrush(canvas.value)
-        canvas.value.freeDrawingBrush.color = 'blue'
-        canvas.value.freeDrawingBrush.width = 5
         canvas.value.isDrawingMode = true
+    }
+
+    const changeBrushWidth=(size)=>{
+        canvas.value.freeDrawingBrush.width=size;
     }
 
     const disableDrawingMode = () => {
@@ -138,13 +144,12 @@ export const useFabric = () => {
 
     const destroyCanvas = async () => {
         if (canvas.value) {
-            // Fabric 6 dispose() is asynchronous and returns a promise
+           
             await canvas.value.dispose();
             canvas.value = null;
             selectedObject.value = null;
             console.log('Canvas destroyed and memory cleared');
         }
-
 
     }
 
@@ -154,11 +159,13 @@ export const useFabric = () => {
             const data = canvas.value.toJSON();
             const res = await axios.post('http://localhost:4000/api/create', { canvasJson: data })
             notify()
+            
         } catch (err) {
             console.log(err.message);
         }
     }
-
+  
+    
 
     return {
         canvas,
@@ -180,6 +187,7 @@ export const useFabric = () => {
         SaveDb,
         fetchAllData,
         fetchDataById,
-        fetchLatest
+        fetchLatest,  
+        changeBrushWidth 
     }
 }
