@@ -61,9 +61,9 @@ export const useHistory = (canvas) => {
 
     const fetchAllData = async () => {
         try {
-            console.log('fetch api hit')
+            
             const res = await axios.get('http://localhost:4000/api/all');
-            console.log(res.data.data)
+            
             return res.data.data;
         } catch (err) {
             console.log(err.message);

@@ -13,18 +13,18 @@ const positionY = shallowRef(0)
 
 export const useFabric = () => {
 
-    const { save, undo, redo, fetchAllData, fetchDataById,fetchLatest } = useHistory(canvas)
+    const { save, undo, redo, fetchAllData, fetchDataById, fetchLatest } = useHistory(canvas)
     const notify = () => {
         toast("Save Succesfull !", {
             autoClose: 1000,
-        }); 
+        });
     }
     const syncToVue = (obj) => {
         if (!obj) return
         selectedObject.value = obj
         positionX.value = Math.round(obj.left)
         positionY.value = Math.round(obj.top)
-        
+
     }
 
     const initCanvas = (canvasEl) => {
@@ -46,7 +46,7 @@ export const useFabric = () => {
             selectedObject.value = null
         })
 
-        
+
         canvas.value.freeDrawingBrush = new PencilBrush(canvas.value)
         canvas.value.freeDrawingBrush.color = 'blue'
         canvas.value.freeDrawingBrush.width = 5
@@ -73,43 +73,65 @@ export const useFabric = () => {
         }
     }
 
-    const addRect = () => {
-        const rect = new Rect({
-            width: 100,
-            height: 100,
-            fill: 'white',
-            left: 50,
-            top: 50,
+    const addRect = (h, w, l, t, c) => {
+        // Agar h ek event hai ya undefined hai, toh default value use karein
+        const finalH = (typeof h === 'number') ? h : 100;
+        const finalW = (typeof w === 'number') ? w : 100;
+        const finalL = (typeof l === 'number') ? l : 50;
+        const finalT = (typeof t === 'number') ? t : 50;
+        const finalC = (typeof c === 'string') ? c : 'white';
+
+
+        const rect = new Rect({ // 'fabric.Rect' check karein aapka kya defined hai
+            height: finalH,
+            width: finalW,
+            left: finalL,
+            top: finalT,
+            fill: finalC,
             stroke: 'black',
             strokeWidth: 2
-        })
-        canvas.value.add(rect)
-        canvas.value.setActiveObject(rect)
+        });
+
+        canvas.value.add(rect);
+        canvas.value.setActiveObject(rect);
+        canvas.value.renderAll(); // Canvas refresh zaroori hai
     }
 
-    const addCircle = () => {
+    const addCircle = (h, w, l, t, c, r) => {
+        const finalH = (typeof h === 'number') ? h : 100;
+        const finalW = (typeof w === 'number') ? w : 100;
+        const finalL = (typeof l === 'number') ? l : 70;
+        const finalT = (typeof t === 'number') ? t : 50;
+        const finalC = (typeof c === 'string') ? c : 'white';
+        const finalR = (typeof r === 'number') ? r : 50;
         const circle = new Circle({
-            width: 100,
-            height: 100,
-            radius: 40,
-            fill: 'white',
-            left: 50,
-            top: 50,
+            width: finalW,
+            height: finalH,
+            radius: finalR,
+            fill: finalC,
+            left: finalL,
+            top: finalT,
             stroke: 'black',
             strokeWidth: 2
         })
         canvas.value.add(circle);
     }
 
-    const addTriangle = () => {
+    const addTriangle = (h, w, l, t, c) => {
+        const finalH = (typeof h === 'number') ? h : 100;
+        const finalW = (typeof w === 'number') ? w : 100;
+        const finalL = (typeof l === 'number') ? l : 70;
+        const finalT = (typeof t === 'number') ? t : 50;
+        const finalC = (typeof c === 'string') ? c : 'white';
+
         const triangle = new Triangle({
-            width: 100,
-            height: 100,
-            fill: 'white',
-            left: 50,
-            top: 50,
-            stroke: "black",
-            strokeWidth: 3
+            height: finalH,
+            width: finalW,
+            left: finalL,
+            top: finalT,
+            fill: finalC,
+            stroke: 'black',
+            strokeWidth: 2
         })
         canvas.value.add(triangle)
     }
@@ -119,8 +141,8 @@ export const useFabric = () => {
         canvas.value.isDrawingMode = true
     }
 
-    const changeBrushWidth=(size)=>{
-        canvas.value.freeDrawingBrush.width=size;
+    const changeBrushWidth = (size) => {
+        canvas.value.freeDrawingBrush.width = size;
     }
 
     const disableDrawingMode = () => {
@@ -144,7 +166,7 @@ export const useFabric = () => {
 
     const destroyCanvas = async () => {
         if (canvas.value) {
-           
+
             await canvas.value.dispose();
             canvas.value = null;
             selectedObject.value = null;
@@ -159,13 +181,13 @@ export const useFabric = () => {
             const data = canvas.value.toJSON();
             const res = await axios.post('http://localhost:4000/api/create', { canvasJson: data })
             notify()
-            
+
         } catch (err) {
             console.log(err.message);
         }
     }
-  
-    
+
+
 
     return {
         canvas,
@@ -183,11 +205,11 @@ export const useFabric = () => {
         undo,
         redo,
         updateObjectPosition,
-        destroyCanvas, 
+        destroyCanvas,
         SaveDb,
         fetchAllData,
         fetchDataById,
-        fetchLatest,  
-        changeBrushWidth 
+        fetchLatest,
+        changeBrushWidth
     }
 }
