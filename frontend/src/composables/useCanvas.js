@@ -180,6 +180,8 @@ export const useFabric = () => {
 
             const data = canvas.value.toJSON();
             const res = await axios.post('http://localhost:4000/api/create', { canvasJson: data })
+            canvas.value.clear();
+            canvas.value.renderAll();
             notify()
 
         } catch (err) {

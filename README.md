@@ -1,21 +1,23 @@
 # Canvas Editor
 
-A full-stack canvas editor built with Vue 3, Fabric.js, Express, and MongoDB. The app lets you add basic shapes, draw freehand, edit selected object properties, manage z-order, and save or reload canvas states from the backend.
+Canvas Editor is a full-stack drawing app built with Vue 3, Fabric.js, Express, and MongoDB. It supports manual shape editing, freehand drawing, undo/redo, persistence to MongoDB, and a text prompt that can generate shapes through the backend AI route.
 
 ## Features
 
 - Add rectangles, circles, and triangles to the canvas.
-- Toggle freehand drawing with a brush tool.
-- Move selected objects and edit their position and fill color.
+- Draw freehand with a configurable brush width.
+- Select an object and edit its position and fill color.
 - Bring objects to the front or send them to the back.
 - Undo and redo canvas changes.
-- Save canvas JSON to MongoDB and load the latest or any saved canvas.
+- Save canvas state to MongoDB and reload previously saved canvases.
+- Generate shapes from a text prompt through the AI command input.
 
 ## Tech Stack
 
-- Frontend: Vue 3, Vite, Fabric.js, Axios, Tailwind CSS, vue3-toastify
+- Frontend: Vue 3, Vite, Fabric.js, Axios, vue3-toastify, Tailwind CSS 4
 - Backend: Node.js, Express, Mongoose, CORS, dotenv
 - Database: MongoDB
+- AI orchestration: LangGraph with LangChain model integrations
 
 ## Project Structure
 
@@ -23,10 +25,15 @@ A full-stack canvas editor built with Vue 3, Fabric.js, Express, and MongoDB. Th
 backend/
 	server.js
 	src/
-		config/db.js
-		controller/canvaController.js
-		model/canvas.js
-		routes/canvaRoute.js
+		config/
+			aiGraph.js
+			db.js
+		controller/
+			canvaController.js
+		model/
+			canvas.js
+		routes/
+			canvaRoute.js
 frontend/
 	src/
 		App.vue
@@ -46,18 +53,18 @@ frontend/
 
 ## Setup
 
-### 1. Backend environment
+### 1. Configure the backend
 
-Create a `.env` file inside `backend/` with the following variables:
+Create a `.env` file inside `backend/`:
 
 ```env
 PORT=4000
 MONGODB_URI=your_mongodb_connection_string
 ```
 
-### 2. Install dependencies
+If you change `PORT`, update the frontend API URLs in `frontend/src/composables/useCanvas.js` and `frontend/src/App.vue` to match.
 
-Install packages for both apps:
+### 2. Install dependencies
 
 ```bash
 cd backend
@@ -76,7 +83,7 @@ cd backend
 npm run dev
 ```
 
-The API will be available at `http://localhost:4000` if you use the example port above.
+The server listens on the port from `.env` and responds on `/` with a basic health message.
 
 ### Start the frontend
 
@@ -85,16 +92,26 @@ cd frontend
 npm run dev
 ```
 
-Open the Vite URL shown in the terminal, usually `http://localhost:5173`.
+Open the Vite URL printed in the terminal, usually `http://localhost:5173`.
 
-## API Endpoints
+## API Routes
 
 Base path: `/api`
 
-- `POST /api/create` - Save a canvas JSON payload
+- `POST /api/create` - Save the current Fabric canvas JSON
 - `GET /api/all` - Fetch all saved canvases
 - `GET /api/latest` - Fetch the most recently saved canvas
 - `GET /api/canva/:id` - Fetch a canvas by MongoDB id
+- `POST /api/ai-command` - Convert a natural-language prompt into shape data
+
+## Usage
+
+The app has two main workflows:
+
+1. Use the toolbar to add shapes, toggle drawing mode, undo/redo, move layers, and save or load canvases.
+2. Use the prompt input at the bottom of the page to type a command such as `draw 2 blue circles`, then submit it to generate shapes through the AI route.
+
+Saved canvases are stored as Fabric JSON in MongoDB and can be reloaded from the dropdown in the toolbar or by loading the latest saved state.
 
 ## Keyboard Shortcuts
 
@@ -103,5 +120,5 @@ Base path: `/api`
 
 ## Notes
 
-- The frontend currently posts to `http://localhost:4000/api/create`, so keep the backend port aligned with that value unless you update the client code.
-- The canvas state is stored as Fabric JSON in MongoDB.
+- The frontend currently calls `http://localhost:4000` directly, so keep that backend port consistent unless you update the client code.
+- The app uses Fabric.js object state, so position, color, brush changes, and shape edits are all reflected in the saved JSON.
