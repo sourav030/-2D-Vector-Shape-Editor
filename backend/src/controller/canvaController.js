@@ -68,10 +68,12 @@ const HandleAi = async (req,res) => {
             input: input,
         });
 
+        console.log(result)
         // 🎯 Response send
         res.json({
             success: true,
             shapes: result.shapes || [],
+            modify:result.parsed
         })
     } catch (error) {
         console.log(error.message);

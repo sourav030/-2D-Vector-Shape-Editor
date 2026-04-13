@@ -1,14 +1,13 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUpdated, ref } from 'vue'
 import { useFabric } from '../composables/useCanvas'
 
-const { selectedObject, positionX, positionY, updateObjectPosition } = useFabric()
-const colors = ref('#ff0000')
+const { selectedObject, positionX, positionY, updateObjectPosition, fill } = useFabric()
+const colors = ref(fill)
 
 const changeColor = () => {
   if (selectedObject.value) {
     selectedObject.value.set('fill', colors.value)
-    console.log(selectedObject)
     selectedObject.value.canvas.renderAll()
   }
 }
@@ -16,6 +15,7 @@ const changeColor = () => {
 onMounted(()=>{
   changeColor()
 })
+
 </script>
 
 <template>

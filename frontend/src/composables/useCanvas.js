@@ -10,7 +10,7 @@ const canvas = shallowRef(null)
 const selectedObject = shallowRef(null)
 const positionX = shallowRef(0)
 const positionY = shallowRef(0)
-
+const fill=shallowRef('')
 export const useFabric = () => {
 
     const { save, undo, redo, fetchAllData, fetchDataById, fetchLatest } = useHistory(canvas)
@@ -21,6 +21,7 @@ export const useFabric = () => {
     }
     const syncToVue = (obj) => {
         if (!obj) return
+        fill.value=obj.fill
         selectedObject.value = obj
         positionX.value = Math.round(obj.left)
         positionY.value = Math.round(obj.top)
@@ -212,6 +213,7 @@ export const useFabric = () => {
         fetchAllData,
         fetchDataById,
         fetchLatest,
-        changeBrushWidth
+        changeBrushWidth,
+        fill
     }
 }

@@ -17,13 +17,15 @@ async function parseNode(state) {
 Convert user input into STRICT JSON only.
 
 Rules:
-- action: "draw_rectangle", "draw_circle", or "draw_triangle"
-- count: number
+- action: "draw_rectangle", "draw_circle", "draw_triangle", "change_color", "change_position", "change_rotation","change_size", "change_radius"
+- count: number (only for draw actions)
 - width/height: for rectangle/triangle
 - radius: only for circle
 - color: string
+- rotate: number (only for change_rotation)
+- left/top: numbers (only for change_position)
 
-RETURN ONLY JSON.
+Return ONLY valid JSON. No text, no explanation.
         `,
       },
       {
@@ -34,7 +36,7 @@ RETURN ONLY JSON.
 
     let cleaned = res.content.trim();
 
-    
+    // Extract JSON safely
     const firstBrace = cleaned.indexOf("{");
     const lastBrace = cleaned.lastIndexOf("}");
 
@@ -42,14 +44,26 @@ RETURN ONLY JSON.
       cleaned = cleaned.substring(firstBrace, lastBrace + 1);
     }
 
-    const parsed = JSON.parse(cleaned);
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (err) {
+      throw new Error("Invalid JSON format");
+    }
+
+    // Normalize action
+    if (parsed.action) {
+      parsed.action = parsed.action.toLowerCase();
+    }
+
+    
 
     return {
       ...state,
       parsed,
     };
   } catch (err) {
-    console.error("Parse Error:", err.message);
+    console.error("❌ Parse Error:", err.message);
 
     return {
       ...state,
@@ -64,15 +78,22 @@ function decisionNode(state) {
   if (!state.parsed) return "__end__";
 
   const action = state.parsed.action;
-
+ 
   if (["draw_rectangle", "draw_circle", "draw_triangle"].includes(action)) {
     return "loop";
+  }
+
+  if (
+    ["change_color", "change_rotation", "change_position", "change_size","change_radius"].includes(action)
+  ) {
+     
+    return "modify";
   }
 
   return "__end__";
 }
 
-// 🔹 Loop Node
+// 🔹 Loop Node (Draw Shapes)
 function loopNode(state) {
   const shapes = [];
 
@@ -86,12 +107,16 @@ function loopNode(state) {
   } = state.parsed;
 
   for (let i = 0; i < count; i++) {
-    const baseSpacing = radius ? radius * 2.5 : (width || 80) + 20;
+    const baseSpacing = radius
+      ? radius * 2.5
+      : (width || 80) + 20;
 
     const shapeBase = {
+      id: Date.now() + i,
       color: color || "black",
       left: 100 + i * baseSpacing,
       top: 100,
+      rotate: 0,
     };
 
     if (action === "draw_circle") {
@@ -123,7 +148,21 @@ function loopNode(state) {
   };
 }
 
-// 🔥 Graph setup
+// 🔹 Modify Node (Edit Shapes)
+function modifyNode(state) {
+  
+   
+  if (!state.shapes || state.shapes.length === 0) {
+    return {
+      ...state,
+  
+    };
+  }
+
+  
+}
+
+// 🔥 Graph Setup
 const graph = new StateGraph({
   channels: {
     input: null,
@@ -135,15 +174,18 @@ const graph = new StateGraph({
 
 graph.addNode("parse", parseNode);
 graph.addNode("loop", loopNode);
+graph.addNode("modify", modifyNode);
 
 graph.setEntryPoint("parse");
 
 graph.addConditionalEdges("parse", decisionNode, {
   loop: "loop",
+  modify: "modify",
   __end__: "__end__",
 });
 
 graph.addEdge("loop", "__end__");
+graph.addEdge("modify", "__end__");
 
 const appGraph = graph.compile();
 
