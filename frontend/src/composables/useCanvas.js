@@ -1,5 +1,5 @@
 
-import { Canvas, Circle, Rect, Triangle, PencilBrush } from 'fabric'
+import { Canvas, Circle, Rect, Triangle, PencilBrush, Path, Line } from 'fabric'
 import { shallowRef } from 'vue'
 import { useHistory } from '../composables/useHistory'
 import axios from 'axios'
@@ -10,7 +10,7 @@ const canvas = shallowRef(null)
 const selectedObject = shallowRef(null)
 const positionX = shallowRef(0)
 const positionY = shallowRef(0)
-const fill=shallowRef('')
+const fill = shallowRef('')
 export const useFabric = () => {
 
     const { save, undo, redo, fetchAllData, fetchDataById, fetchLatest } = useHistory(canvas)
@@ -21,7 +21,7 @@ export const useFabric = () => {
     }
     const syncToVue = (obj) => {
         if (!obj) return
-        fill.value=obj.fill
+        fill.value = obj.fill
         selectedObject.value = obj
         positionX.value = Math.round(obj.left)
         positionY.value = Math.round(obj.top)
@@ -32,7 +32,7 @@ export const useFabric = () => {
         if (!canvasEl.value) return
 
         canvas.value = new Canvas(canvasEl.value, {
-            width: 700,
+            width: 900,
             height: 500,
             backgroundColor: 'white',
             preserveObjectStacking: true
@@ -190,6 +190,61 @@ export const useFabric = () => {
         }
     }
 
+    const enableSnapping = () => {
+        const gridSize = 20;
+        canvas.value.on('object:moving', (options) => {
+            options.target.set({
+                left: Math.round(options.target.left / gridSize) * gridSize,
+                top: Math.round(options.target.top / gridSize) * gridSize
+            });
+        });
+    };
+
+    const addArc = () => {
+        const arc = new Circle({
+            radius: 50,
+            left: 100,
+            top: 100,
+            stroke: 'black',
+            strokeWidth: 2,
+            fill: '',
+            startAngle: 0,
+            endAngle: 180, // Half circle
+        });
+        canvas.value.add(arc);
+        canvas.value.renderAll();
+    };
+
+
+    const addSpline = () => {
+       
+        const splinePath = new Path('M 0 0 Q 50 100 100 0', {
+            left: 150,
+            top: 150,
+            fill: '',
+            stroke: 'blue',
+            strokeWidth: 3
+        });
+        canvas.value.add(splinePath);
+        canvas.value.renderAll();
+    };
+
+
+    const addLine = () => {
+    // [x1, y1, x2, y2] -> Start (50, 50) se End (200, 50) tak ek line
+    const line = new Line([50, 50, 200, 50], {
+        stroke: 'black',
+        strokeWidth: 3,
+        left: 100,
+        top: 100,
+        originX: 'center',
+        originY: 'center'
+    });
+
+    canvas.value.add(line);
+    canvas.value.setActiveObject(line); // Line ko select kar dega turant
+    canvas.value.renderAll();
+};
 
 
     return {
@@ -214,6 +269,10 @@ export const useFabric = () => {
         fetchDataById,
         fetchLatest,
         changeBrushWidth,
-        fill
+        fill,
+        addArc,
+        addSpline,
+        enableSnapping,
+        addLine
     }
 }

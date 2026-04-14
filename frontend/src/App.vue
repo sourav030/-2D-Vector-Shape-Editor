@@ -58,7 +58,7 @@ const drawShape = async () => {
 
       // 🔄 ROTATION
       else if (action === "change_rotation") {
-        activeObj.set("angle", response.data.modify.angle || 0);
+        activeObj.set("angle", response.data.modify.angle || 50);
       }
 
       // 📍 POSITION
