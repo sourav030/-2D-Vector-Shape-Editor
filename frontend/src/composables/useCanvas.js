@@ -1,5 +1,5 @@
 
-import { Canvas, Circle, Rect, Triangle, PencilBrush, Path, Line } from 'fabric'
+import { Canvas, Circle, Rect, Triangle, PencilBrush, Path, Line, Polygon } from 'fabric'
 import { shallowRef } from 'vue'
 import { useHistory } from '../composables/useHistory'
 import axios from 'axios'
@@ -75,7 +75,7 @@ export const useFabric = () => {
     }
 
     const addRect = (h, w, l, t, c) => {
-        // Agar h ek event hai ya undefined hai, toh default value use karein
+
         const finalH = (typeof h === 'number') ? h : 100;
         const finalW = (typeof w === 'number') ? w : 100;
         const finalL = (typeof l === 'number') ? l : 50;
@@ -83,7 +83,7 @@ export const useFabric = () => {
         const finalC = (typeof c === 'string') ? c : 'white';
 
 
-        const rect = new Rect({ // 'fabric.Rect' check karein aapka kya defined hai
+        const rect = new Rect({
             height: finalH,
             width: finalW,
             left: finalL,
@@ -209,7 +209,7 @@ export const useFabric = () => {
             strokeWidth: 2,
             fill: '',
             startAngle: 0,
-            endAngle: 180, // Half circle
+            endAngle: 180,
         });
         canvas.value.add(arc);
         canvas.value.renderAll();
@@ -217,34 +217,68 @@ export const useFabric = () => {
 
 
     const addSpline = () => {
-       
-        const splinePath = new Path('M 0 0 Q 50 100 100 0', {
+
+        const splinePathData = 'M 0 50 C 30 0, 70 100, 100 50';
+
+        const splinePath = new Path(splinePathData, {
             left: 150,
             top: 150,
             fill: '',
             stroke: 'blue',
-            strokeWidth: 3
+            strokeWidth: 3,
+            strokeUniform: true
         });
+
         canvas.value.add(splinePath);
         canvas.value.renderAll();
     };
 
+    const addPentagon = () => {
+        const sideCount = 5;
+        const radius = 50; // Controls the size
+        const points = [];
+
+        // Calculate the 5 vertices of the pentagon
+        for (let i = 0; i < sideCount; i++) {
+            const angle = (i / sideCount) * Math.PI * 2 - Math.PI / 2;
+            points.push({
+                x: radius * Math.cos(angle),
+                y: radius * Math.sin(angle)
+            });
+        }
+
+        const pentagon = new Polygon(points, {
+            left: 150,
+            top: 150,
+            fill: 'yellow',
+            stroke: 'black',
+            strokeWidth: 2,
+            // Ensures the bounding box fits the shape perfectly
+            objectCaching: false
+        });
+
+        canvas.value.add(pentagon);
+        canvas.value.setActiveObject(pentagon);
+        canvas.value.renderAll();
+    };
+
+
 
     const addLine = () => {
-    // [x1, y1, x2, y2] -> Start (50, 50) se End (200, 50) tak ek line
-    const line = new Line([50, 50, 200, 50], {
-        stroke: 'black',
-        strokeWidth: 3,
-        left: 100,
-        top: 100,
-        originX: 'center',
-        originY: 'center'
-    });
 
-    canvas.value.add(line);
-    canvas.value.setActiveObject(line); // Line ko select kar dega turant
-    canvas.value.renderAll();
-};
+        const line = new Line([50, 50, 200, 50], {
+            stroke: 'black',
+            strokeWidth: 3,
+            left: 100,
+            top: 100,
+            originX: 'center',
+            originY: 'center'
+        });
+
+        canvas.value.add(line);
+        canvas.value.setActiveObject(line);
+        canvas.value.renderAll();
+    };
 
 
     return {
@@ -273,6 +307,6 @@ export const useFabric = () => {
         addArc,
         addSpline,
         enableSnapping,
-        addLine
+        addLine,addPentagon
     }
 }

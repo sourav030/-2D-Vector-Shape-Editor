@@ -27,15 +27,13 @@ await destroyCanvas()
 </script>
 
 <template>
-  
-
-    <div class="flex justify-center border rounded-sm  shadow-sm hover:shadow-xl hover:translate-y-1 bg-white">
-      <canvas  class="box" ref="canvasId"></canvas>
+  <div class="flex justify-center bg-[#f3f3f3] p-10 min-h-[500px]">
+    <div class="bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200 overflow-hidden">
+      <canvas ref="canvasId" class="block"></canvas>
     </div>
-  
-  
+  </div>
 </template>
 
-<style>
+<style scoped>
 
 </style>

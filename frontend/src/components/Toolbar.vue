@@ -2,16 +2,41 @@
 import { onMounted, ref } from 'vue';
 import { useFabric } from '../composables/useCanvas'
 
-const { addRect,
-    addCircle, changeBrushWidth,
-    addTriangle, fetchAllData,
-    enableDrawingMode, SaveDb, addLine,
-    disableDrawingMode, undo, redo, addArc, addSpline, enableSnapping,
-    sentToFront, sentToBack, fetchDataById, fetchLatest } = useFabric()
+
+import {
+    Circle,
+    RectangleHorizontal, 
+    Triangle,
+    Minus,      
+    Spline,
+    Undo, Redo  , Pentagon   
+} from 'lucide-vue-next'
+
+const { 
+    addRect,
+    addCircle, 
+    changeBrushWidth,
+    addTriangle, 
+    fetchAllData,
+    enableDrawingMode, 
+    SaveDb, 
+    addLine,
+    disableDrawingMode, 
+    undo, 
+    redo, 
+    addArc, 
+    addSpline, 
+    enableSnapping,
+    sentToFront, 
+    sentToBack, 
+    fetchDataById, 
+    fetchLatest, addPentagon 
+} = useFabric()
 
 const data = ref([]);
 const size = ref(5);
 const selectedId = ref('')
+
 
 function formatDateTime(date) {
     return new Date(date).toLocaleString("en-IN", {
@@ -34,64 +59,70 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="flex  justify-center mt-2 ">
-        <div class="border p-2  shadow-md rounded-2xl ">
-            <button @click="addRect"
-                class="p-1 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white rounded-sm m-2 border  pl-1">Add
-                Rectangle +</button>
-            <button @click="addCircle"
-                class="p-1 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white rounded-sm m-2 border pl-1">Add
-                Circle +</button>
-            <button @click="addTriangle"
-                class="p-1 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white rounded-sm m-2  border pl-1">Add
-                Triangle +</button>
-            <button @click="enableDrawingMode"
-                class="p-1 cursor-pointer bg-green-500 hover:bg-green-600 text-white rounded-sm m-2 border pl-1">Enable
-                brush </button>
-            <button @click="disableDrawingMode"
-                class="p-1 cursor-pointer bg-gray-500 hover:bg-gray-600 text-white rounded-sm m-2 border pl-1">Disable
-                brush</button>
-            <button @click="undo"
-                class="p-1 cursor-pointer bg-purple-500 hover:bg-purple-600 text-white rounded-sm m-2 border pl-1">undo</button>
-            <button @click="redo"
-                class="p-1 cursor-pointer bg-purple-500 hover:bg-purple-600 text-white rounded-sm m-2 border pl-1">Redo</button>
-            <button @click="sentToFront"
-                class="p-1 cursor-pointer bg-orange-500 hover:bg-orange-600 text-white rounded-sm m-2 border pl-1">setFront</button>
-            <button @click="sentToBack"
-                class="p-1 cursor-pointer bg-orange-500 hover:bg-orange-600 text-white rounded-sm m-2 border pl-1">setBack</button>
-            <button @click="hangleSave"
-                class="p-1 cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white m-2 rounded-sm border pl-1">save</button>
-            <button @click="fetchLatest"
-                class="p-1 cursor-pointer bg-sky-500 hover:bg-sky-600 text-white rounded-sm m-2 border pl-1">load</button>
-            <button @click="addArc"
-                class="p-1 cursor-pointer bg-cyan-500 hover:bg-cyan-600 text-white rounded-sm m-2 border pl-1">
-                Add Arc ( Curve )
-            </button>
+    <div class="flex justify-center mt-1">
+        <div class="flex justify-around flex-wrap items-center gap-4 border w-full p-3 border-gray-600 rounded-2xl bg-[#202020]">
+            
+            <div class="flex items-center gap-1 border pr-3 border-gray-800 p-2">
+                <button @click="addRect" class="tool-btn" title="Add Rectangle">
+                    <RectangleHorizontal :size="60" color="#fff" fill="#202020" :stroke-width="0.5" />
+                </button>
+                <button @click="addPentagon" class="tool-btn" title="Add Rectangle">
+                    <Pentagon :size="60" color="#fff" fill="#202020" :stroke-width="0.5" />
+                </button>
+                <button @click="addCircle" class="tool-btn" title="Add Circle">
+                    <Circle :size="60" color="#fff" fill="#202020" :stroke-width="0.5" />
+                </button>
+                <button @click="addTriangle" class="tool-btn" title="Add Triangle">
+                    <Triangle :size="60" color="#fff" fill="#202020" :stroke-width="0.5" />
+                </button>
+                <button @click="addLine" class="tool-btn" title="Add Line">
+                   <Minus :size="60" color="#fff" :stroke-width="0.5" />
+                </button>
+                <button @click="addSpline" class="tool-btn" title="Add Arc">
+                    <Spline :size="60" color="#fff"  :stroke-width="0.5" />
+                </button>
+            </div>
 
-            <button @click="addSpline"
-                class="p-1 cursor-pointer bg-indigo-500 hover:bg-indigo-600 text-white rounded-sm m-2 border pl-1">
-                Add Spline
-            </button>
+            <div class="flex items-center gap-2 border-r border  border-gray-800 p-2.5 pl-5 pr-5">
+                <div class="flex flex-col gap-1">
+                    <button @click="enableDrawingMode" class="text-[13px] px-2 py-0.5 p-3  text-white border border-gray-500 rounded hover:bg-green-700">
+                        Brush ON
+                    </button>
+                    <button @click="disableDrawingMode" class="text-[13px] px-2 py-0.5 p-3 border border-gray-500 text-white rounded hover:bg-gray-700">
+                        Brush OFF
+                    </button>
+                </div>
+                <input @change="changeBrushWidth(size)" v-model="size" type="range" min="5" max="50" class="w-16 h-1 bg-blue-200 rounded-lg appearance-none cursor-pointer">
+            </div>
 
-            <button @click="enableSnapping"
-                class="p-1 cursor-pointer bg-rose-500 hover:bg-rose-600 text-white rounded-sm m-2 border pl-1">
-                Enable Snapping (20px)
-            </button>
+            <div class="flex items-center gap-1.5 border border-r  border-gray-800 p-3 pl-5 pr-5">
+                <button @click="undo" class="action-btn text-white  border border-gray-500 p-1 cursor-pointer hover:bg-gray-400 "><Undo/></button>
+                <button @click="redo" class="action-btn text-white  border border-gray-500 p-1 cursor-pointer hover:bg-gray-400 "><Redo/></button>
+            </div>
 
-            <button @click="addLine"
-                class="p-1 cursor-pointer bg-slate-500 hover:bg-slate-600 text-white rounded-sm m-2 border pl-1">
-                Add Line —
-            </button>
+            <div class="flex items-center gap-1 border p-1.5 border-gray-800 pl-5 pr-5">
+                <button @click="sentToFront" class="action-btn text-white border border-gray-500 p-1 cursor-pointer hover:bg-gray-400">Front</button>
+                <button @click="sentToBack" class="action-btn text-white  border border-gray-500 p-1 cursor-pointer hover:bg-gray-400">Back</button>
+                <button @click="enableSnapping" class="action-btn text-white border  border-gray-500 p-1 cursor-pointer hover:bg-gray-400">Snap</button>
+            </div>
 
-            <input @change="changeBrushWidth(size)" v-model="size" type="range" min="5" max="50"
-                class="p-1 cursor-pointer bg-sky-500 hover:bg-sky-600 text-white rounded-sm m-2 border pl-1">
-            <select class=" cursor-pointer p-1 bg-slate-700 text-white border border-slate-600  rounded-sm"
-                v-model="selectedId" @change="() => fetchDataById(selectedId)">
-                <option disabled value="">Select image</option>
-                <option v-for="item in data" :key="item._id" :value="item._id">
-                    {{ formatDateTime(item.createdAt) }}
-                </option>
-            </select>
+            <div class="flex items-center border p-2 border-gray-800 gap-2 pl-5 pr-5">
+                <button @click="hangleSave" class="px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-sm font-bold transition-colors">
+                    SAVE
+                </button>
+                <button @click="fetchLatest" class="px-3 py-1.5 bg-sky-600 text-white rounded-md hover:bg-sky-700 text-sm transition-colors">
+                    LOAD
+                </button>
+                
+                <select class="cursor-pointer p-1.5  text-white border border-gray-300 rounded-md text-xs shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                    v-model="selectedId" @change="() => fetchDataById(selectedId)">
+                    <option disabled value="">History</option>
+                    <option v-for="item in data" :key="item._id" :value="item._id" class="text-white bg-[#202020]">
+                        {{ formatDateTime(item.createdAt) }}
+                    </option>
+                </select>
+            </div>
         </div>
     </div>
 </template>
+
