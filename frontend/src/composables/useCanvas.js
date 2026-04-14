@@ -1,5 +1,5 @@
 
-import { Canvas, Circle, Rect, Triangle, PencilBrush, Path, Line, Polygon } from 'fabric'
+import { Canvas, Circle, Rect, Triangle, PencilBrush, Path, Line, Polygon, Polyline } from 'fabric'
 import { shallowRef } from 'vue'
 import { useHistory } from '../composables/useHistory'
 import axios from 'axios'
@@ -11,6 +11,10 @@ const selectedObject = shallowRef(null)
 const positionX = shallowRef(0)
 const positionY = shallowRef(0)
 const fill = shallowRef('')
+let polylinePoints = []
+let tempDots = []
+let activeLine = null
+
 export const useFabric = () => {
 
     const { save, undo, redo, fetchAllData, fetchDataById, fetchLatest } = useHistory(canvas)
@@ -235,10 +239,10 @@ export const useFabric = () => {
 
     const addPentagon = () => {
         const sideCount = 5;
-        const radius = 50; // Controls the size
+        const radius = 50;
         const points = [];
 
-        // Calculate the 5 vertices of the pentagon
+
         for (let i = 0; i < sideCount; i++) {
             const angle = (i / sideCount) * Math.PI * 2 - Math.PI / 2;
             points.push({
@@ -253,7 +257,7 @@ export const useFabric = () => {
             fill: 'yellow',
             stroke: 'black',
             strokeWidth: 2,
-            // Ensures the bounding box fits the shape perfectly
+          
             objectCaching: false
         });
 
@@ -262,6 +266,109 @@ export const useFabric = () => {
         canvas.value.renderAll();
     };
 
+
+
+
+const startPointSelection = () => {
+    polylinePoints = [];
+    tempDots = [];
+    activeLine = null;
+
+    canvas.value.isDrawingMode = false;
+    canvas.value.selection = false;
+    canvas.value.defaultCursor = 'crosshair';
+
+   
+    canvas.value.on('mouse:down', (options) => {
+        const pointer = canvas.value.getScenePoint(options.e);
+        const newPoint = { x: pointer.x, y: pointer.y };
+
+        polylinePoints.push(newPoint);
+    
+        const dot = new Circle({
+            radius: 3,
+            fill: '#ef4444',
+            left: newPoint.x,
+            top: newPoint.y,
+            originX: 'center',
+            originY: 'center',
+            selectable: false
+        });
+        tempDots.push(dot);
+        canvas.value.add(dot);
+
+       
+        if (polylinePoints.length > 1) {
+            const prevPoint = polylinePoints[polylinePoints.length - 2];
+            const line = new Line([prevPoint.x, prevPoint.y, newPoint.x, newPoint.y], {
+                stroke: 'black',
+                strokeWidth: 2,
+                selectable: false,
+                evented: false
+            });
+            tempDots.push(line);
+            canvas.value.add(line);
+        }
+        
+        canvas.value.renderAll();
+    });
+
+ 
+    canvas.value.on('mouse:move', (options) => {
+        if (polylinePoints.length === 0) return;
+
+        const pointer = canvas.value.getScenePoint(options.e);
+        const lastPoint = polylinePoints[polylinePoints.length - 1];
+
+     
+        if (activeLine) {
+            canvas.value.remove(activeLine);
+        }
+
+        
+        activeLine = new Line([lastPoint.x, lastPoint.y, pointer.x, pointer.y], {
+            stroke: 'rgba(0,0,0,0.3)',
+            strokeWidth: 2,
+            selectable: false,
+            evented: false,
+            strokeDashArray: [5, 5] 
+        });
+
+        canvas.value.add(activeLine);
+        canvas.value.renderAll();
+    });
+};
+
+const createPolylineFromPoints = () => {
+    if (polylinePoints.length < 2) {
+        
+        return;
+    }
+
+  
+    tempDots.forEach(obj => canvas.value.remove(obj));
+    if (activeLine) canvas.value.remove(activeLine);
+
+   
+    const poly = new Polyline(polylinePoints, {
+        fill: 'transparent',
+        stroke: 'black',
+        strokeWidth: 3,
+        objectCaching: false
+    });
+
+    canvas.value.add(poly);
+
+   
+    canvas.value.off('mouse:down');
+    canvas.value.off('mouse:move');
+    canvas.value.selection = true;
+    canvas.value.defaultCursor = 'default';
+
+    canvas.value.setActiveObject(poly);
+    canvas.value.renderAll();
+    save();
+};
 
 
     const addLine = () => {
@@ -306,7 +413,7 @@ export const useFabric = () => {
         fill,
         addArc,
         addSpline,
-        enableSnapping,
-        addLine,addPentagon
+        enableSnapping, startPointSelection, createPolylineFromPoints,
+        addLine, addPentagon
     }
 }
