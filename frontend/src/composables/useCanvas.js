@@ -3,6 +3,7 @@ import { Canvas, Circle, Rect, Triangle, PencilBrush, Path, Line, Polygon, Polyl
 import { shallowRef } from 'vue'
 import { useHistory } from '../composables/useHistory'
 import axios from 'axios'
+import { API_BASE_URL } from '../config/api'
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
@@ -184,7 +185,7 @@ export const useFabric = () => {
         try {
 
             const data = canvas.value.toJSON();
-            const res = await axios.post('http://localhost:4000/api/create', { canvasJson: data })
+            const res = await axios.post(`${API_BASE_URL}/create`, { canvasJson: data })
             canvas.value.clear();
             canvas.value.renderAll();
             notify()

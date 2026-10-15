@@ -6,6 +6,7 @@ import Toolbar from './components/Toolbar.vue';
 import axios from 'axios'
 import color from 'color'
 import { useFabric } from './composables/useCanvas'
+import { API_BASE_URL } from './config/api'
 
 const text = ref('')
 const loading = ref(false)
@@ -19,7 +20,7 @@ const drawShape = async () => {
   loading.value = true;
 
   try {
-    const response = await axios.post('http://localhost:4000/api/ai-command', {
+    const response = await axios.post(`${API_BASE_URL}/ai-command`, {
       input: currentCommand
     });
 

@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 const undoStack = ref([]);
 const redoStack = ref([]);
 let isProcessing = false; 
@@ -62,7 +63,7 @@ export const useHistory = (canvas) => {
     const fetchAllData = async () => {
         try {
             
-            const res = await axios.get('http://localhost:4000/api/all');
+            const res = await axios.get(`${API_BASE_URL}/all`);
             
             return res.data.data;
         } catch (err) {
@@ -73,7 +74,7 @@ export const useHistory = (canvas) => {
     const fetchDataById = async (id) => {
         try {
             
-            const response = await axios.get(`http://localhost:4000/api/canva/${id}`);
+            const response = await axios.get(`${API_BASE_URL}/canva/${id}`);
             const canvasJson = response.data.data.canvasJson;
             undoStack.value = [];
             redoStack.value = [];
@@ -88,7 +89,7 @@ export const useHistory = (canvas) => {
     const fetchLatest=async(req,res)=>{
         try{
             console.log('api hit');
-            const response = await axios.get(`http://localhost:4000/api/latest`);
+            const response = await axios.get(`${API_BASE_URL}/latest`);
             const canvasJson = response.data.canvasJson;
             console.log(canvasJson)
             undoStack.value = [];
